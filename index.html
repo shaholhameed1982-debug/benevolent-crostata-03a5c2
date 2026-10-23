@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070710">
+  <meta name="description" content="HUMAID AI — explore ideas, learn, and create with AI.">
+  <title>HUMAID AI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { color-scheme: dark; }
+    body {
+      font-family: Inter, Arial, sans-serif; background: #070710; color: #fff;
+      min-height: 100vh; display: flex; flex-direction: column;
+      background-image: radial-gradient(ellipse at 50% 0%, #25164b 0%, transparent 45%);
+    }
+    header {
+      display:flex; justify-content:space-between; align-items:center; gap:12px;
+      padding:20px clamp(18px, 7vw, 90px); border-bottom:1px solid #24243b;
+    }
+    .logo { font-size:24px; font-weight:800; letter-spacing:.5px; color:#c4b5fd; }
+    .badge { color:#c4b5fd; border:1px solid #6d4aff; padding:8px 13px; border-radius:20px; font-size:11px; letter-spacing:1px; }
+    main { flex:1; }
+    .hero { text-align:center; padding:64px 18px 30px; animation:appear .7s ease; }
+    .eyebrow { color:#a78bfa; font-size:12px; letter-spacing:3px; margin-bottom:18px; }
+    h1 { font-size:clamp(38px, 7vw, 70px); line-height:1.08; margin-bottom:18px; }
+    .gradient { background:linear-gradient(90deg,#c4b5fd,#38bdf8); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .hero p { color:#aaaac0; font-size:16px; line-height:1.7; }
+    .ai-orb {
+      width:94px; height:94px; margin:28px auto 8px; border-radius:50%;
+      background:radial-gradient(circle at 30% 30%,#ddd6fe,#7c3aed 45%,#111128 75%);
+      box-shadow:0 0 55px #7040ff55; animation:float 3s ease-in-out infinite;
+    }
+    .chat {
+      width:min(720px, 92%); margin:20px auto 55px; padding:20px;
+      background:#11111eeb; border:1px solid #30304c; border-radius:20px;
+      box-shadow:0 10px 60px #0008; backdrop-filter:blur(12px);
+    }
+    .chat-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; font-weight:700; }
+    .online-dot { width:8px; height:8px; border-radius:50%; background:#4ade80; box-shadow:0 0 12px #4ade8080; }
+    #messages { min-height:100px; max-height:360px; overflow-y:auto; margin-bottom:16px; padding-right:3px; }
+    .message { padding:13px 15px; margin:10px 0; border-radius:13px; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .user { background:#32245e; margin-left:clamp(10px, 10%, 60px); }
+    .bot { background:#1c1c30; margin-right:clamp(5px, 6%, 35px); }
+    .input-area { display:flex; gap:10px; }
+    input {
+      flex:1; min-width:0; padding:15px; background:#080811; border:1px solid #373752;
+      border-radius:11px; color:white; outline:none; font-size:15px;
+    }
+    input:focus { border-color:#a78bfa; }
+    button {
+      padding:14px 19px; border:0; border-radius:11px;
+      background:linear-gradient(90deg,#8b5cf6,#3b82f6); color:white; font-weight:700;
+      cursor:pointer; transition:transform .2s, opacity .2s;
+    }
+    button:hover { transform:translateY(-1px); }
+    button:disabled { opacity:.6; cursor:wait; transform:none; }
+    .hint { color:#77778e; font-size:11px; margin-top:12px; line-height:1.5; }
+    footer { text-align:center; padding:22px; color:#77778e; border-top:1px solid #24243b; font-size:13px; }
+    @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+    @keyframes appear { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+    @media(max-width:440px) {
+      header { padding:17px; } .logo { font-size:20px; } .badge { font-size:9px; padding:7px 9px; }
+      .chat { padding:14px; } .input-area { gap:7px; } button { padding:12px 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">HUMAID AI</div>
+    <div class="badge">AI ASSISTANT</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">YOUR PERSONAL AI SPACE</div>
+      <h1>Your Ideas.<br><span class="gradient">Powered by AI.</span></h1>
+      <p>Ask questions, learn new things, and explore your ideas.<br>Welcome to HUMAID AI.</p>
+      <div class="ai-orb" aria-hidden="true"></div>
+    </section>
+
+    <section class="chat" aria-label="AI chat">
+      <div class="chat-title"><span class="online-dot"></span> HUMAID AI Chat</div>
+      <div id="messages" aria-live="polite">
+        <div class="message bot">👋 Hi! I'm HUMAID AI. What would you like to explore today?</div>
+      </div>
+      <form class="input-area" id="chatForm">
+        <input id="userInput" type="text" maxlength="2000" placeholder="Ask me anything..." autocomplete="off" required>
+        <button id="sendButton" type="submit">Send ↗</button>
+      </form>
+      <p class="hint">AI can make mistakes. Don't enter passwords, private information, or sensitive personal details.</p>
+    </section>
+  </main>
+
+  <footer>© 2026 HUMAID AI · Built for the future.</footer>
+
+  <script>
+    const form = document.getElementById("chatForm");
+    const input = document.getElementById("userInput");
+    const messages = document.getElementById("messages");
+    const sendButton = document.getElementById("sendButton");
+    const history = [];
+
+    function addMessage(text, type) {
+      const div = document.createElement("div");
+      div.className = "message " + type;
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+      return div;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const question = input.value.trim();
+      if (!question || sendButton.disabled) return;
+
+      addMessage(question, "user");
+      history.push({ role: "user", content: question });
+      input.value = "";
+      sendButton.disabled = true;
+      sendButton.textContent = "...";
+      const thinking = addMessage("Thinking…", "bot");
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: history.slice(-12) })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "The request failed.");
+        const answer = data.answer || "I couldn't create a response just now. Please try again.";
+        thinking.textContent = answer;
+        history.push({ role: "assistant", content: answer });
+        if (history.length > 12) history.splice(0, history.length - 12);
+      } catch (error) {
+        thinking.textContent = "Sorry, I couldn't connect right now. Check that the site is deployed and its AI API key is configured.";
+        console.error(error);
+      } finally {
+        sendButton.disabled = false;
+        sendButton.textContent = "Send ↗";
+        input.focus();
+      }
+    });
+  </script>
+</body>
+</html>
